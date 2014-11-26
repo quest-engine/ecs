@@ -1,0 +1,7 @@
+.idea
+
+# nodejs dependencies for build
+node_modules/
+
+# builded from assets
+demo/
