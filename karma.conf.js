@@ -19,6 +19,7 @@ module.exports = function(config) {
       'src/observer.js',
       'src/component.js',
       'src/entity.js',
+      'src/system.js',
       'src/ecs.js',
       'test/**/*.js'
     ],

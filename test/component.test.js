@@ -1,14 +1,10 @@
 
-/*global describe, it, before, expect, beforeEach, Component */
+/*global describe, it, before, expect, beforeEach, ECS */
 
 describe("Component", function() {
   "use strict";
 
-  it("should expose an component object", function () {
-    if (!Component) {
-      throw new Error("Component object undefined");
-    }
-  });
+  var Component = ECS.Component;
 
   describe("instance", function () {
     var c;
