@@ -29,3 +29,36 @@ This behavior does not apply to server-side.
 
 For more informations, see the [entity component system](http://en.wikipedia.org/wiki/Entity_component_system) page on wikipedia.
 
+### Simple example
+
+TODO
+
+## Hack on ecs
+
+### Git
+
+[Gitflow workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow) is used for branching.
+
+Ecs follows [Git commit messages convention](https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit) used by Angular team.
+
+### Build
+
+This project uses gulp to :
+
+ * Validate code
+ * Concat/uglify code
+ * Produce `demo/` and `dist/` folders
+ * Continuous tests run
+ * Several other utilities such as bumping versions
+
+See commands for the full set of commands.
+
+### Test driven development
+
+All code must be tested with `karma`, `mocha` and `chai`. It is highly recommended to adopt a [TDD](http://en.wikipedia.org/wiki/Test-driven_development) approach.
+
+### Rules
+
+* No external dependency is allowed
+* All code must be validated with `jshint`, see gulp commands
+* Commit messages and branching must respect the conventions
