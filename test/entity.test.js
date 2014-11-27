@@ -1,14 +1,11 @@
 
-/*global describe, it, before, expect, beforeEach, Entity, Component */
+/*global describe, it, before, expect, beforeEach, ECS */
 
 describe("Entity", function() {
   "use strict";
 
-  it("should expose an entity object", function () {
-    if (!Entity) {
-      throw new Error("Entity object undefined");
-    }
-  });
+  var Entity = ECS.Entity;
+  var Component = ECS.Component;
 
   describe("instance", function () {
     var ent;

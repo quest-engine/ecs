@@ -13,9 +13,13 @@ var paths = {
   scripts: [
     './src/inherit.js',
     './src/observer.js',
-    './src/component.js',
     './src/entity.js',
+    './src/component.js',
+    './src/system.js',
     './src/ecs.js'
+  ],
+  demoScripts: [
+    './src/demo/demo.js'
   ],
   version: [
     './package.json'
@@ -24,19 +28,30 @@ var paths = {
 
 gulp.task('templates', function() {
   return gulp.src(paths.templates)
-    .pipe(jade())
-    .pipe(gulp.dest('./demo'));
+      .pipe(jade())
+      .pipe(gulp.dest('./demo'))
+      .pipe(connect.reload());
 });
 
 gulp.task('scripts', function () {
   return gulp.src(paths.scripts)
     .pipe(concat('ecs.js'))
-    .pipe(gulp.dest('./demo'));
+    .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('scripts:demo', function () {
+  gulp.src(paths.demoScripts)
+      .pipe(gulp.dest('./demo'));
+
+  gulp.src('./dist/ecs.js')
+      .pipe(gulp.dest('./demo'))
+      .pipe(connect.reload());
 });
 
 gulp.task('watch', function () {
   gulp.watch(paths.templates, ['templates']);
   gulp.watch(paths.scripts, ['scripts']);
+  gulp.watch(paths.demoScripts, ['scripts:demo']);
 });
 
 gulp.task('connect', function() {
