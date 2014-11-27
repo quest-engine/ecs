@@ -3,7 +3,8 @@
 var gulp    = require('gulp'),
     connect = require('gulp-connect'),
     concat  = require('gulp-concat'),
-    jade    = require('gulp-jade');
+    jade    = require('gulp-jade'),
+    bump    = require('gulp-bump');
 
 var paths = {
   templates: [
@@ -15,6 +16,9 @@ var paths = {
     './src/component.js',
     './src/entity.js',
     './src/ecs.js'
+  ],
+  version: [
+    './package.json'
   ]
 };
 
@@ -43,6 +47,24 @@ gulp.task('connect', function() {
       port: 8001
     }
   });
+});
+
+gulp.task('bump', function () {
+  return gulp.src(paths.version)
+    .pipe(bump())
+    .pipe(gulp.dest('./'));
+});
+
+gulp.task('bump:minor', function () {
+  return gulp.src(paths.version)
+    .pipe(bump({type: 'minor'}))
+    .pipe(gulp.dest('./'));
+});
+
+gulp.task('bump:major', function () {
+  return gulp.src(paths.version)
+    .pipe(bump({type: 'major'}))
+    .pipe(gulp.dest('./'));
 });
 
 gulp.task('default', ['templates', 'scripts', 'connect', 'watch']);
