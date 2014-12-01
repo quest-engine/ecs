@@ -1,0 +1,15 @@
+{
+  "name": "quest-ecs",
+  "version": "0.0.1",
+  "dependencies": {
+    "chai": "^1.10.0",
+    "karma": "^0.12.28",
+    "karma-chai": "^0.1.0",
+    "karma-mocha": "^0.1.9",
+    "karma-phantomjs-launcher": "^0.1.4",
+    "mocha": "^2.0.1"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.3.0-alpha10"
+  }
+}
