@@ -1,3 +1,6 @@
+
+/*global _getIndexByProperty */
+
 /**
  * creates a new entity component system
  * @constructor
@@ -45,4 +48,12 @@ ECS.prototype.removeEntity = function (arg0) {
   if (index !== -1) {
     this.entities.splice(index, 1);
   }
+};
+
+ECS.prototype.makeSystem = function () {
+
+};
+
+ECS.prototype.moveSystem = function () {
+
 };

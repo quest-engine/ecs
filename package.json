@@ -10,6 +10,7 @@
     "mocha": "^2.0.1"
   },
   "devDependencies": {
+    "gulp-connect": "^2.2.0",
     "jsdoc": "^3.3.0-alpha10"
   }
 }
