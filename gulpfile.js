@@ -9,7 +9,9 @@ paths.scripts = [
 
 gulp.task('jsdoc', function () {
   gulp.src(paths.scripts)
-    .pipe(jsdoc('./docs'))
+    .pipe(jsdoc('./docs', {
+        path: 'ink-docstrap'
+      }))
     .pipe(connect.reload());
 });
 
