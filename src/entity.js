@@ -1,6 +1,9 @@
 /**
  * an entity objects which has an unique id and a collection of components
  * @constructor
+ * @fires Entity#add
+ * @fires Entity#update
+ * @fires Entity#remove
  */
 var Entity = function () {
   /**
@@ -16,13 +19,11 @@ var Entity = function () {
    */
   this.components = {};
 
+  // make every entity observable to emit and receive events
+  Observable.make(this);
+
   Entity.prototype._count += 1;
 };
-
-Entity.Message = {};
-
-Entity.Message.ComponentAdd = 0;
-Entity.Message.ComponentRemove = 1;
 
 /**
  * update one or multiple components
@@ -78,16 +79,56 @@ Entity.prototype._update = function (name, data) {
         }
       }
     }
+
+    /**
+     * report updates on components
+     * @event Entity#update
+     * @param {string} name - name of the updated component
+     * @param {object} data - values of the component
+     * @param {object} updated - data applied to the component
+     */
+    this.emit('update', name, component, data);
   } else {
     // if the component does not exists, add it silently
     this.components[name] = data;
 
-    // todo: uncomment when emit will be available
-    /*this.emit(Entity.Message.ComponentAdd, {
-      name: name,
-      data: data
-    });*/
+    /**
+     * report components added
+     * @event Entity#add
+     * @param {string} name - name of the added component
+     * @param {object} data - data of the added component
+     */
+    this.emit('add', name, data);
   }
+};
+
+/**
+ * remove a component from an entity
+ * @param {string} name - the name of the component
+ */
+Entity.prototype.remove = function (name) {
+  if (this.components[name] !== undefined) {
+    var data = this.components[name];
+
+    delete this.components[name];
+
+    /**
+     * report removal of components
+     * @event
+     * @param {string} name - name of the removed component
+     * @param {object} data - data of the removed component
+     */
+    this.emit('remove', name, data);
+  }
+};
+
+/**
+ * test if a component exists in an entity
+ * @param {string} name - the name of the component to test existence
+ * @returns {boolean} - true if the entity has the desired components, false otherwise
+ */
+Entity.prototype.has = function (name) {
+  return this.components[name] !== undefined;
 };
 
 // counter used to generate uid for this entity

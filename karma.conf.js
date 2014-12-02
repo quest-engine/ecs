@@ -15,8 +15,11 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'src/**/!(ecs).js',
-      'src/**/ecs.js',
+      'src/observer.js',
+      'src/array.js',
+      'src/entity.js',
+      'src/system.js',
+      'src/ecs.js',
       'test/**/*.test.js'
     ],
 
