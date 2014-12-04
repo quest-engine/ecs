@@ -1,4 +1,93 @@
+<!DOCTYPE html>
 
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Documentation Source: ecs.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	
+	<link type="text/css" rel="stylesheet" href="styles/site.simplex.css">
+	
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="navbar navbar-fixed-top ">
+		<div class="navbar-inner">
+			<a class="brand" href="index.html">Documentation</a>
+			<ul class="nav">
+				
+				<li class="dropdown">
+					<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="ECS.html">ECS</a>
+						</li>
+						
+						<li>
+							<a href="Entity.html">Entity</a>
+						</li>
+						
+						<li>
+							<a href="System.html">System</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+				<li class="dropdown">
+					<a href="events.list.html" class="dropdown-toggle" data-toggle="dropdown">Events<b
+						class="caret"></b></a>
+
+					<ul class="dropdown-menu ">
+						
+						<li>
+							<a href="ECS.html#event:addEntity">addEntity</a>
+						</li>
+						
+						<li>
+							<a href="ECS.html#event:removeEntity">removeEntity</a>
+						</li>
+						
+						<li>
+							<a href="Entity.html#event:add">add</a>
+						</li>
+						
+						<li>
+							<a href="Entity.html#event:update">update</a>
+						</li>
+						
+
+					</ul>
+				</li>
+				
+			</ul>
+		</div>
+	</div>
+
+	<div class="row-fluid">
+
+		
+			<div class="span12">
+				
+				<div id="main">
+					
+
+
+		<h1 class="page-title">Source: ecs.js</h1>
+    
+    <section>
+        <article>
+            <pre class="sunlight-highlight-javascript ">
 /*global _getIndexByProperty */
 
 /**
@@ -38,10 +127,10 @@ var ECS = function () {
  *
  * @param {string|string[]} [arg] - create an entity with a set of default
  * components:
- * <br/>
+ * &lt;br/>
  *   - string: the name of the entity schema. The schema must be registered with
  * {@link ECS#registerEntity} before.
- * <br/>
+ * &lt;br/>
  *   - string[]: an array of components schemas names. The schemas must be
  * registered with {@link ECS#registerComponent} before.
  *
@@ -66,7 +155,7 @@ ECS.prototype.createEntity = function (arg) {
     }
 
     // iterate over components list and clone schemas into real components
-    for (; c < components.length; c += 1) {
+    for (; c &lt; components.length; c += 1) {
       var name = components[c],
         data   = this._components[name];
 
@@ -101,7 +190,7 @@ ECS.prototype.addEntity = function (entity) {
 
 /**
  * tests if an entity exists
- * @param {string|Entity} arg0 - the entity id if string<br/>
+ * @param {string|Entity} arg0 - the entity id if string&lt;br/>
  * the entity instance if object
  * @returns {boolean} - true if the entity exists, false otherwise
  */
@@ -113,7 +202,7 @@ ECS.prototype.hasEntity = function (arg0) {
 
 /**
  * remove an entity by id
- * @param {string|Entity} arg0 - the entity id if string<br/>
+ * @param {string|Entity} arg0 - the entity id if string&lt;br/>
  * the entity instance if object
  */
 ECS.prototype.removeEntity = function (arg0) {
@@ -137,37 +226,37 @@ ECS.prototype.removeEntity = function (arg0) {
  * register a component schema to be used by entity factory
  * @param {string} name - the name of the schema
  * @param {object} defaults - an object containing the default
- * values, take the form of: <br/>
- * <pre>
+ * values, take the form of: &lt;br/>
+ * &lt;pre>
  *   {
  *     property1: "value",
  *     property2: 123456
  *   }
- * </pre>
+ * &lt;/pre>
  */
 ECS.prototype.registerComponent = function (name, defaults) {
   this._components[name] = defaults;
 };
 
 /**
- * create a new system. this function has two signatures: <br/>
- * <pre>
+ * create a new system. this function has two signatures: &lt;br/>
+ * &lt;pre>
  *   var sys = ecs.createSystem(['cmp1', 'cmp2'], callback);
  *   console.log(sys.name); // 'unammed0'
- * </pre>
+ * &lt;/pre>
  * and the other one where you can specify a name:
- * <pre>
+ * &lt;pre>
  *   var sys = ecs.createSystem('mySystem', ['cmp1', 'cmp2'], callback);
  *   console.log(sys.name); // 'mySystem'
- * </pre>
+ * &lt;/pre>
  * @param {string|array} arg0 -
- * <b>string</b>: the system name<br/>
- * <b>array</b>: the system dependencies
+ * &lt;b>string&lt;/b>: the system name&lt;br/>
+ * &lt;b>array&lt;/b>: the system dependencies
  * @param {array|function} arg1 -
- * <b>array</b>: the system dependencies
- * <b>function</b>: the function to apply to entities
+ * &lt;b>array&lt;/b>: the system dependencies
+ * &lt;b>function&lt;/b>: the function to apply to entities
  * @param {function} arg2 -
- * <b>function</b>: the function to apply to entities
+ * &lt;b>function&lt;/b>: the function to apply to entities
  */
 ECS.prototype.createSystem = function (arg0, arg1, arg2) {
 
@@ -229,4 +318,60 @@ ECS.prototype._broadcast = function (event, args) {
   args.unshift(event);
 
   this.emit.apply(this, args);
-};
+};</pre>
+        </article>
+    </section>
+
+
+
+
+
+				</div>
+
+				<div class="clearfix"></div>
+				<footer>
+					
+					
+		<span class="jsdoc-message">
+		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha5</a>
+		on Thu Dec 04 2014 00:38:38 GMT+0100 (Paris, Madrid) using the <a href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
+		</span>
+				</footer>
+			</div>
+
+			
+			<br clear="both">
+		</div>
+
+	</div>
+	<script src="scripts/sunlight.js"></script>
+	<script src="scripts/sunlight.javascript.js"></script>
+	<script src="scripts/sunlight-plugin.doclinks.js"></script>
+	<script src="scripts/sunlight-plugin.linenumbers.js"></script>
+	<script src="scripts/sunlight-plugin.menu.js"></script>
+	<script src="scripts/jquery.min.js"></script>
+	<script src="scripts/jquery.scrollTo.js"></script>
+	<script src="scripts/jquery.localScroll.js"></script>
+	<script src="scripts/bootstrap-dropdown.js"></script>
+	<script src="scripts/toc.js"></script>
+
+
+	<script>  Sunlight.highlightAll({lineNumbers:,  showMenu: true, enableDoclinks :true}); </script>
+
+	<script>
+		$( function () {
+			$( "#toc" ).toc( {
+				selectors   : "h1,h2,h3,h4",
+				showAndHide : false,
+				scrollTo    : 60
+			} );
+			$( "#toc>ul" ).addClass( "nav nav-pills nav-stacked" );
+			$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+
+		} );
+	</script>
+
+	
+
+</body>
+</html>

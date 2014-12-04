@@ -1,4 +1,6 @@
 
+/*global beforeEach*/
+
 describe("ECS", function () {
   describe('#constructor', function () {
     it("should create an ecs", function () {
@@ -145,5 +147,14 @@ describe("ECS", function () {
 
       ent.remove('cmp');
     });
+  });
+
+  describe('#system', function () {
+    var ecs;
+
+    beforeEach(function () {
+      ecs = new ECS();
+    });
+
   });
 });
