@@ -12,7 +12,7 @@ var System = function (name, dependencies, func) {
    * name of the system
    * @member {string}
    */
-  this.name = name || "unammed" + System.prototype._count;
+  this.name = name || "unnamed" + System.prototype._count;
 
   /**
    * array of components the entity depends on
@@ -23,10 +23,15 @@ var System = function (name, dependencies, func) {
   /**
    * "system" function that is applied to all matching entity each ecs tick
    * @member {function}
+   * @private
    */
-  this.func = func;
+  this._process = func;
 
   System.prototype._count++;
+};
+
+System.prototype.process = function (entity) {
+  this._process(entity.id, entity.components);
 };
 
 /**

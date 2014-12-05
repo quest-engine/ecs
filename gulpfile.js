@@ -1,11 +1,31 @@
 var gulp  = require('gulp'),
   jsdoc   = require('gulp-jsdoc'),
   connect = require('gulp-connect'),
+  concat  = require('gulp-concat'),
+  uglify = require('gulp-uglify'),
+  header = require('gulp-header'),
   paths   = {};
 
 paths.scripts = [
-  './src/**/*.js'
+  './src/array.js',
+  './src/observer.js',
+  './src/entity.js',
+  './src/system.js',
+  './src/ecs.js'
 ];
+
+gulp.task('build', function () {
+  gulp.src(paths.scripts)
+    .pipe(concat('ecs.js'))
+    .pipe(gulp.dest('./dist'));
+});
+
+gulp.task('build:min', function () {
+  gulp.src(paths.scripts)
+    .pipe(concat('ecs.min.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest('./dist'));
+});
 
 gulp.task('jsdoc', function () {
   gulp.src(paths.scripts)

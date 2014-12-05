@@ -28,9 +28,41 @@ var ECS = function () {
    */
   this._entities = {};
 
+  /**
+   * list of systems
+   * @member {System[]}
+   * @private
+   */
+  this.systems = [];
+
   // make this object observable. Then it will broadcast entity changes
   // to make system update their entity list
   Observable.make(this);
+};
+
+/**
+ * process a tick in current ecs
+ */
+ECS.prototype.tick = function () {
+  var e = 0, s, ent, sys;
+
+  for (; e < this.entities.length; e += 1) {
+    ent = this.entities[e];
+
+    for (s = 0; s < this.systems.length; s += 1) {
+      sys = this.systems[s];
+
+      // check if entity systems cache exists
+      if (ent._systems[sys.name] === undefined) {
+        ent._systems[sys.name] = sys.matchDependencies(ent);
+      }
+
+      // if entity should be processed, do it
+      if (ent._systems[sys.name]) {
+        sys.process(ent);
+      }
+    }
+  }
 };
 
 /**
@@ -68,7 +100,7 @@ ECS.prototype.createEntity = function (arg) {
     // iterate over components list and clone schemas into real components
     for (; c < components.length; c += 1) {
       var name = components[c],
-        data   = this._components[name];
+        data   = JSON.parse(JSON.stringify(this._components[name]));
 
       ent.update(name, data);
     }
@@ -160,17 +192,25 @@ ECS.prototype.registerComponent = function (name, defaults) {
  *   var sys = ecs.createSystem('mySystem', ['cmp1', 'cmp2'], callback);
  *   console.log(sys.name); // 'mySystem'
  * </pre>
- * @param {string|array} arg0 -
+ * @param {string|string[]|function} arg0 -
  * <b>string</b>: the system name<br/>
- * <b>array</b>: the system dependencies
- * @param {array|function} arg1 -
- * <b>array</b>: the system dependencies
+ * <b>string[]</b>: the system dependencies<br/>
  * <b>function</b>: the function to apply to entities
- * @param {function} arg2 -
+ * @param {string[]|function} [arg1] -
+ * <b>string[]</b>: the system dependencies<br/>
+ * <b>function</b>: the function to apply to entities
+ * @param {function} [arg2] -
  * <b>function</b>: the function to apply to entities
  */
 ECS.prototype.createSystem = function (arg0, arg1, arg2) {
+  var func  = typeof arg0 === 'function' ? arg0 : (typeof arg1 === 'function' ? arg1 : arg2),
+    name    = typeof arg0 === 'string' ? arg0 : null,
+    deps    = Array.isArray(arg0) ? arg0 : arg1,
+    sys     = new System(name, deps, func);
 
+  this.systems.push(sys);
+
+  return sys;
 };
 
 /**

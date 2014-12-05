@@ -95,6 +95,28 @@ describe("ECS", function () {
       });
     });
 
+    //todo: better name
+    it("should isolate components", function () {
+      ecs.registerComponent('component', {
+        value: 'default'
+      });
+
+      var ent1 = ecs.createEntity(['component']);
+      var ent2 = ecs.createEntity(['component']);
+
+      ent2.update('component', {
+        value: 'hello'
+      });
+
+      expect(ent1.components.component).to.be.deep.equal({
+        value: 'default'
+      });
+
+      expect(ent2.components.component).to.be.deep.equal({
+        value: 'hello'
+      });
+    });
+
     it("should emit an event when a component is added", function (done) {
       ecs.on("componentAdd", function (entity, name) {
         expect(entity.id).to.be.a('string');
@@ -150,11 +172,66 @@ describe("ECS", function () {
   });
 
   describe('#system', function () {
-    var ecs;
+    var ecs, e;
 
     beforeEach(function () {
       ecs = new ECS();
+
+      System.prototype._count = 0;
+
+      // fake entity
+      e = {
+        components: {
+          c: {count: 0}
+        }
+      };
     });
 
+    it("should create a system (1 arg signature)", function () {
+      var sys = ecs.createSystem(function (name, components) {});
+
+      expect(sys.name).to.be.equal('unnamed0');
+      expect(sys.dependencies.length).to.be.equal(0);
+    });
+
+    it("should create a system (2 args signature)", function () {
+      var sys = ecs.createSystem(['c'], function (name, components) {});
+
+      expect(sys.name).to.be.equal('unnamed0');
+      expect(sys.dependencies.length).to.be.equal(1);
+    });
+
+    it("should create a system (3 args signature)", function () {
+      var sys = ecs.createSystem('sys', ['c'], function (name, components) {});
+
+      expect(sys.name).to.be.equal('sys');
+      expect(sys.dependencies.length).to.be.equal(1);
+    });
+
+    it("should process an entity", function () {
+      var sys = ecs.createSystem(function (name, components) {
+        components.c.count += 1;
+      });
+
+      sys.process(e);
+
+      expect(e.components.c.count).to.be.equal(1);
+    });
+
+    it("should process an entity according to dependencies", function () {
+      ecs.createSystem(function (name, components) {
+        components.c.count += 1;
+      });
+
+      var ent = ecs.createEntity();
+
+      ent.update('c', {
+        count: 0
+      });
+
+      ecs.tick();
+
+      expect(ent.components.c.count).to.be.equal(1);
+    });
   });
 });
