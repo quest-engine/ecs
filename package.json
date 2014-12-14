@@ -1,21 +1,39 @@
 {
   "name": "quest-ecs",
-  "version": "0.0.1",
-  "dependencies": {
+  "version": "0.0.2",
+  "dependencies": {},
+  "devDependencies": {
+    "gulp": "^3.8.10",
+    "gulp-bump": "^0.1.11",
+    "gulp-connect": "^2.2.0",
+    "gulp-jsdoc": "^0.1.4",
+    "jsdoc": "^3.3.0-alpha10",
     "chai": "^1.10.0",
     "gulp-concat": "^2.4.2",
     "gulp-header": "^1.2.2",
     "gulp-uglify": "^1.0.1",
+    "gulp-wrap": "^0.5.0",
     "karma": "^0.12.28",
     "karma-chai": "^0.1.0",
     "karma-mocha": "^0.1.9",
     "karma-phantomjs-launcher": "^0.1.4",
     "mocha": "^2.0.1"
   },
-  "devDependencies": {
-    "gulp": "^3.8.10",
-    "gulp-connect": "^2.2.0",
-    "gulp-jsdoc": "^0.1.4",
-    "jsdoc": "^3.3.0-alpha10"
-  }
+  "description": "Entity Component System implementation for JS.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "karma start karma.conf.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:quest-engine/ecs.git"
+  },
+  "keywords": [
+    "quest-engine"
+  ],
+  "author": "Pierre BEAUJEU <pierre.beaujeu@rednet.io> (https://github.com/Oza94)",
+  "license": "ISC"
 }

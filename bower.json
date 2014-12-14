@@ -1,0 +1,12 @@
+{
+  "name": "quest-ecs",
+  "version": "0.0.2",
+  "main": "dist/ecs.json",
+  "ignore": [
+    "node_modules",
+    "demo",
+    "tmp"
+  ],
+  "dependencies": {},
+  "devDependencies": {}
+}
