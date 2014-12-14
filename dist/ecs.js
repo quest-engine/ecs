@@ -559,7 +559,7 @@ ECS.prototype._broadcast = function (event, args) {
   if (typeof window !== 'undefined' && typeof require === "function" &&
     typeof define === "function") {
 
-    define("observer", [], function () {
+    define([], function () {
       return ECS;
     });
   } else if (typeof module !== 'undefined' && module.exports) {
