@@ -31,7 +31,7 @@ var System = function (name, dependencies, func) {
 };
 
 System.prototype.process = function (entity) {
-  this._process(entity.id, entity.components);
+  this._process(entity.id, entity.components, entity);
 };
 
 /**
