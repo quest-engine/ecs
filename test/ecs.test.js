@@ -36,6 +36,18 @@ describe("ECS", function () {
       expect(res).to.be.equal(true);
     });
 
+    it("should get an entity", function () {
+      var res = ecs.getEntity('someid');
+
+      expect(res).to.be.equal(undefined);
+
+      var entity = ecs.createEntity();
+
+      res = ecs.getEntity(entity.id);
+
+      expect(res).to.be.an('object');
+    });
+
     it("should remove an entity", function () {
       var ent = ecs.createEntity();
 

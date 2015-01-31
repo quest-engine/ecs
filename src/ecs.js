@@ -143,6 +143,13 @@ ECS.prototype.hasEntity = function (arg0) {
   return _getIndexByProperty(this.entities, 'id', id) !== -1;
 };
 
+ECS.prototype.getEntity = function (arg0) {
+  var id = typeof arg0 === 'object' ? arg0.id : arg0,
+    ind  = _getIndexByProperty(this.entities, 'id', id);
+
+  return this.entities[ind];
+};
+
 /**
  * remove an entity by id
  * @param {string|Entity} arg0 - the entity id if string<br/>
