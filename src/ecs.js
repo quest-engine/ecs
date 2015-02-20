@@ -169,6 +169,7 @@ ECS.prototype.removeEntity = function (arg0) {
      * @param {Entity} entity - entity removed
      */
     this.emit("removeEntity", ent);
+    ent.emit('remove');
   }
 };
 
