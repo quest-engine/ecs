@@ -178,6 +178,9 @@ Entity.prototype._update = function (name, data) {
     // if the component does not exists, add it silently
     this.components[name] = data;
 
+    // reset the system cache
+    this._systems = {};
+
     /**
      * report components added
      * @event Entity#add
