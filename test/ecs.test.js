@@ -181,6 +181,18 @@ describe("ECS", function () {
 
       ent.remove('cmp');
     });
+
+    it("should not remove an entity when a component is removed", function () {
+      var ent = ecs.createEntity();
+
+      ent.update('cmp', {
+        hello: 'world'
+      });
+
+      ent.remove('cmp');
+
+      expect(ecs.hasEntity(ent.id)).to.be.equal(true);
+    });
   });
 
   describe('#system', function () {
