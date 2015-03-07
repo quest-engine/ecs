@@ -198,6 +198,9 @@ Entity.prototype.remove = function (name) {
 
     delete this.components[name];
 
+    // remove the system matching cache because we removed a components
+    this._systems = {};
+
     /**
      * report removal of components
      * @event
