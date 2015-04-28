@@ -107,6 +107,12 @@ describe("ECS", function () {
       });
     });
 
+    it("should throw an error if component schema is missng", function () {
+      expect(function () {
+        ecs.createEntity(['component']);
+      }).to.throw(Error);
+    });
+
     //todo: better name
     it("should isolate components", function () {
       ecs.registerComponent('component', {

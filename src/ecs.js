@@ -99,8 +99,13 @@ ECS.prototype.createEntity = function (arg) {
 
     // iterate over components list and clone schemas into real components
     for (; c < components.length; c += 1) {
-      var name = components[c],
-        data   = JSON.parse(JSON.stringify(this._components[name]));
+      var name = components[c];
+
+      if (!this._components[name]) {
+        throw new Error('no component schema \'' + name + '\'');
+      }
+
+      var data   = JSON.parse(JSON.stringify(this._components[name]));
 
       ent.update(name, data);
     }
