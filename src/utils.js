@@ -32,3 +32,20 @@ function _getValueByProperty(array, pname, pvalue) {
 
   return array[i] || null;
 }
+
+var _uidCounter = 0,
+  _uidMax       = 10000000000; // when nextUid reach this value, it is reseted to 0
+
+/**
+ * generate up to _uidMax unique integers
+ * @return {Number} a unique integer
+ */
+function _nextUid() {
+  _uidCounter += 1;
+
+  if (_uidCounter >= _uidMax) {
+    _uidCounter = 1;
+  }
+
+  return _uidCounter;
+}

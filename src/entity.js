@@ -5,13 +5,12 @@
  * @fires Entity#update
  * @fires Entity#remove
  */
-var Entity = function () {
+var Entity = function (id) {
   /**
    * unique id of the entity
-   * @member {string}
+   * @member {Number}
    * */
-  this.id = (+new Date()).toString(16) + (Math.random() * 100000000 | 0)
-      .toString(16) + Entity.prototype._count;
+  this.id = id;
 
   /**
    * collection of components
@@ -27,10 +26,11 @@ var Entity = function () {
   this._systems = {};
 
   // make every entity observable to emit and receive events
-  Observable.make(this);
-
-  Entity.prototype._count += 1;
+  Observer.make(this);
 };
+
+// Instance variables
+Entity.prototype.disposed = false;
 
 /**
  * update one or multiple components
@@ -73,28 +73,14 @@ Entity.prototype._update = function (name, data) {
   var component = this.components[name];
 
   if (component) {
-    // if the component has an `update()` method, use it
-    if (component.update && typeof component.update === 'function') {
-      component.update(data);
-    } else {
-      var e;
+    var e;
 
-      // apply new properties
-      for (e in data) {
-        if (data.hasOwnProperty(e)) {
-          component[e] = data[e];
-        }
+    // apply new properties
+    for (e in data) {
+      if (data.hasOwnProperty(e)) {
+        component[e] = data[e];
       }
-    }
-
-    /**
-     * report updates on components
-     * @event Entity#update
-     * @param {string} name - name of the updated component
-     * @param {object} data - values of the component
-     * @param {object} updated - data applied to the component
-     */
-    this.emit('update', name, component, data);
+    }    
   } else {
     // if the component does not exists, add it silently
     this.components[name] = data;
@@ -108,7 +94,7 @@ Entity.prototype._update = function (name, data) {
      * @param {string} name - name of the added component
      * @param {object} data - data of the added component
      */
-    this.emit('add', name, data);
+    this.emit('addComponent', name, data);
   }
 };
 
@@ -120,7 +106,7 @@ Entity.prototype.remove = function (name) {
   if (this.components[name] !== undefined) {
     var data = this.components[name];
 
-    delete this.components[name];
+    this.components[name] = undefined;
 
     // remove the system matching cache because we removed a components
     this._systems = {};
@@ -131,7 +117,7 @@ Entity.prototype.remove = function (name) {
      * @param {string} name - name of the removed component
      * @param {object} data - data of the removed component
      */
-    this.emit('remove', name, data);
+    this.emit('removeComponent', name, data);
   }
 };
 
@@ -143,6 +129,3 @@ Entity.prototype.remove = function (name) {
 Entity.prototype.has = function (name) {
   return this.components[name] !== undefined;
 };
-
-// counter used to generate uid for this entity
-Entity.prototype._count = 0;

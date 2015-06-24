@@ -25,7 +25,7 @@ describe("ECS", function () {
     });
 
     it("should test if an entity exists", function () {
-      var res = ecs.hasEntity('someid');
+      var res = ecs.hasEntity(123);
 
       expect(res).to.be.equal(false);
 
@@ -37,7 +37,7 @@ describe("ECS", function () {
     });
 
     it("should get an entity", function () {
-      var res = ecs.getEntity('someid');
+      var res = ecs.getEntity(123);
 
       expect(res).to.be.equal(undefined);
 
@@ -58,10 +58,20 @@ describe("ECS", function () {
       expect(ecs.hasEntity(ent.id)).to.be.equal(false);
     });
 
+    it("should flag removed entities", function () {
+      var ent = ecs.createEntity();
+
+      expect(ent.disposed).to.be.equal(false);
+
+      ecs.removeEntity(ent.id);
+
+      expect(ent.disposed).to.be.equal(true);
+    });
+
     it("should emit an entity add event", function (done) {
       var ent;
 
-      ecs.on('addEntity', function (data) {
+      ecs.on('add', function (data) {
         expect(data.id).to.be.equal(ent.id);
 
         done();
@@ -76,7 +86,7 @@ describe("ECS", function () {
     it("should emit an entity remove event", function (done) {
       var ent = ecs.createEntity();
 
-      ecs.on('removeEntity', function (data) {
+      ecs.on('remove', function (data) {
         expect(data.id).to.be.equal(ent.id);
         expect(ecs.hasEntity(data.id)).to.be.equal(false);
 
@@ -84,6 +94,36 @@ describe("ECS", function () {
       });
 
       ecs.removeEntity(ent);
+    });
+
+    it("should create unique ids", function () {
+      var ids = [], ent = null;
+
+      for (var i = 0; i < 1000; i += 1) {
+        ent = ecs.createEntity();
+
+        expect(ids.indexOf(ent.id)).to.be.equal(-1, 'duplicate entity id at index ' + i);
+
+        ids.push(ent.id);
+      }
+    });
+  });
+
+  describe("#isLocal()", function () {
+    var ecs;
+
+    beforeEach(function () {
+      ecs = new ECS(123);
+    });
+
+    it("should return true if the id is a local one", function () {
+      expect(ecs.isLocal(1123));
+      expect(ecs.isLocal(456456123));
+    });
+
+    it("should return false if the id is not a local one", function () {
+      expect(!ecs.isLocal(123124));
+      expect(!ecs.isLocal(1124));
     });
   });
 
@@ -133,59 +173,6 @@ describe("ECS", function () {
       expect(ent2.components.component).to.be.deep.equal({
         value: 'hello'
       });
-    });
-
-    it("should emit an event when a component is added", function (done) {
-      ecs.on("componentAdd", function (entity, name) {
-        expect(entity.id).to.be.a('string');
-        expect(name).to.be.equal('cmp');
-
-        done();
-      });
-
-      var ent = ecs.createEntity();
-      ent.update('cmp', {
-        hello: 'world'
-      });
-    });
-
-    it("should emit an event when a component is updated", function (done) {
-      ecs.on("componentUpdate", function (entity, name, data) {
-        expect(entity.id).to.be.a('string');
-        expect(name).to.be.equal('cmp');
-        expect(data).to.be.deep.equal({
-          hello: 'universe'
-        });
-
-        done();
-      });
-
-      var ent = ecs.createEntity();
-
-      ent.update('cmp', {
-        hello: 'world'
-      });
-
-      ent.update('cmp', {
-        hello: 'universe'
-      });
-    });
-
-    it("should emit an event when a component is removed", function (done) {
-      ecs.on("componentRemove", function (entity, name) {
-        expect(entity.id).to.be.a('string');
-        expect(name).to.be.equal('cmp');
-
-        done();
-      });
-
-      var ent = ecs.createEntity();
-
-      ent.update('cmp', {
-        hello: 'world'
-      });
-
-      ent.remove('cmp');
     });
 
     it("should not remove an entity when a component is removed", function () {

@@ -1,13 +1,15 @@
 
 /*global _getIndexByProperty */
 
+var MAX_SALTS = 1000;
+
 /**
  * creates a new entity component system
  * @constructor
  * @fires ECS#addEntity
  * @fires ECS#removeEntity
  */
-var ECS = function () {
+var ECS = function (salt) {
   /**
    * list of entities
    * @member {array}
@@ -35,9 +37,21 @@ var ECS = function () {
    */
   this.systems = [];
 
+  /**
+   * "salt" used to generate unique entity ids accros multiple instances
+   * @type {Number}
+   */
+  this.salt = salt || 0;
+
   // make this object observable. Then it will broadcast entity changes
   // to make system update their entity list
-  Observable.make(this);
+  Observer.make(this);
+};
+
+ECS.prototype.isLocal = function (entityId) {
+  var localId = Math.floor(entityId / MAX_SALTS);
+
+  return this.salt === entityId % localId;
 };
 
 /**
@@ -80,7 +94,9 @@ ECS.prototype.tick = function () {
  * @returns {Entity} - the newly created entity
  */
 ECS.prototype.createEntity = function (arg) {
-  var ent = new Entity();
+  var id = this.salt + (MAX_SALTS * _nextUid());
+
+  var ent = new Entity(id);
 
   if (arg) {
     var components = null, c = 0;
@@ -105,7 +121,7 @@ ECS.prototype.createEntity = function (arg) {
         throw new Error('no component schema \'' + name + '\'');
       }
 
-      var data   = JSON.parse(JSON.stringify(this._components[name]));
+      var data = JSON.parse(JSON.stringify(this._components[name]));
 
       ent.update(name, data);
     }
@@ -119,11 +135,6 @@ ECS.prototype.createEntity = function (arg) {
  * @param {Entity} entity - the entity to add
  */
 ECS.prototype.addEntity = function (entity) {
-  // listen for entity events
-  entity.on('add', this._onComponentAdd(entity));
-  entity.on('update', this._onComponentUpdate(entity));
-  entity.on('remove', this._onComponentRemove(entity));
-
   this.entities.push(entity);
 
   /**
@@ -131,7 +142,7 @@ ECS.prototype.addEntity = function (entity) {
    * @event ECS#addEntity
    * @param {Entity} entity - added entity
    */
-  this.emit('addEntity', entity);
+  this.emit('add', entity);
 
   return entity;
 };
@@ -168,13 +179,15 @@ ECS.prototype.removeEntity = function (arg0) {
   if (index !== -1) {
     ent = this.entities.splice(index, 1)[0];
 
+    ent.disposed = true;
+
     /**
      * remove entity event
      * @event ECS#removeEntity
      * @param {Entity} entity - entity removed
      */
-    this.emit("removeEntity", ent);
-    ent.emit('removeEntity');
+    this.emit('remove', ent);
+    ent.emit('remove');
   }
 };
 
@@ -224,62 +237,4 @@ ECS.prototype.createSystem = function (arg0, arg1, arg2) {
   this.systems.push(sys);
 
   return sys;
-};
-
-/**
- * create a closure that broadcast an add event from an entity. The main goal
- * of this closure is to append the entity object in the event arguments
- * @param {Entity} entity - the entity
- * @returns {Function} - the created callback
- * @private
- */
-ECS.prototype._onComponentAdd = function (entity) {
-  var self = this;
-
-  return function (name, data) {
-    self._broadcast('componentAdd', [entity, name, data]);
-  };
-};
-
-/**
- * create a closure that broadcast an update event from an entity. The main goal
- * of this closure is to append the entity object in the event arguments
- * @param {Entity} entity - the entity
- * @returns {Function} - the created callback
- * @private
- */
-ECS.prototype._onComponentUpdate = function (entity) {
-  var self = this;
-
-  return function (name, data) {
-    self._broadcast('componentUpdate', [entity, name, data]);
-  };
-};
-
-/**
- * create a closure that broadcast a remove event from an entity. The main goal
- * of this closure is to append the entity object in the event arguments
- * @param {Entity} entity - the entity
- * @returns {Function} - the created callback
- * @private
- */
-ECS.prototype._onComponentRemove = function (entity) {
-  var self = this;
-
-  return function (name, data) {
-    self._broadcast('componentRemove', [entity, name, data]);
-  };
-};
-
-/**
- * broadcast an event to all systems
- * @param {string} event - name of the event
- * @param {*} args - arguments of the event
- * @private
- */
-ECS.prototype._broadcast = function (event, args) {
-  // prepend event as the first argument
-  args.unshift(event);
-
-  this.emit.apply(this, args);
 };

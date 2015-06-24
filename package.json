@@ -1,6 +1,6 @@
 {
   "name": "quest-ecs",
-  "version": "0.0.14",
+  "version": "0.1.0",
   "dependencies": {},
   "devDependencies": {
     "gulp": "^3.8.10",
