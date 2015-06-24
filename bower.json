@@ -1,6 +1,6 @@
 {
   "name": "quest-ecs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "dist/ecs.json",
   "ignore": [
     "node_modules",
