@@ -93,8 +93,14 @@ ECS.prototype.tick = function () {
  *
  * @returns {Entity} - the newly created entity
  */
-ECS.prototype.createEntity = function (arg) {
-  var id = this.salt + (MAX_SALTS * _nextUid());
+ECS.prototype.createEntity = function (arg0, arg1) {
+  var arg = arg1 || typeof arg0 === 'number' ? arg1 : arg0, id = null;
+
+  if (arg1 || typeof arg0 === 'number') {
+    id = arg0;
+  } else {
+    id = this.salt + (MAX_SALTS * _nextUid());  
+  }  
 
   var ent = new Entity(id);
 

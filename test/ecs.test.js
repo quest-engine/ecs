@@ -24,6 +24,14 @@ describe("ECS", function () {
       expect(entity.id).to.exist();
     });
 
+    it("should create an entity with an id", function () {
+      var entity = ecs.createEntity(231);
+
+      expect(entity).to.exist();
+      expect(entity.id).to.be.equal(231);
+    });
+
+
     it("should test if an entity exists", function () {
       var res = ecs.hasEntity(123);
 
