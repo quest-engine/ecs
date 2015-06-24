@@ -9,7 +9,7 @@ var gulp  = require('gulp'),
   paths   = {};
 
 paths.scripts = [
-  './src/array.js',
+  './src/utils.js',
   './src/observer.js',
   './src/entity.js',
   './src/system.js',
