@@ -40,13 +40,13 @@ gulp.task('bump:major', function () {
 });
 
 gulp.task('build', function () {
-  gulp.src(paths.scripts)
+  return gulp.src(paths.scripts)
     .pipe(concat('ecs.js'))
     .pipe(gulp.dest('./tmp'));
 });
 
 gulp.task('wrap', ['build'], function () {
-  gulp.src('./tmp/ecs.js')
+ return  gulp.src('./tmp/ecs.js')
     .pipe(wrap({
       src: './src/wrap.txt'
     }))

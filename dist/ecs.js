@@ -5,78 +5,124 @@
   // `window` in the browser or `global` on node
   var root = typeof window !== 'undefined' ? window : global;
 
-  /**
- * return the index of an object in an array depending on the value of a
- * property
- * @param {array} array - the array
- * @param {string} pname - name of the property
- * @param {*} pvalue - expected value of the property
- * @returns {number} - the index if a hash was found, -1 otherwise
- * @private
- */
-function _getIndexByProperty(array, pname, pvalue) {
-  var i = 0;
+  var Observer = {},
+  Observable = {};
 
-  for (; i < array.length; i += 1) {
-    if (array[i][pname] === pvalue) {
-      return i;
+// some shortcuts to call listeners
+function callListeners(listeners) {
+  for (var i = 0; i < listeners.length; i += 1) {
+    listeners[i]();
+  }
+}
+
+function callListenersWith1Args(listeners, arg0) {
+  for (var i = 0; i < listeners.length; i += 1) {
+    listeners[i](arg0);
+  }
+}
+
+function callListenersWith2Args(listeners, arg0, arg1) {
+  for (var i = 0; i < listeners.length; i += 1) {
+    listeners[i](arg0, arg1);
+  }
+}
+
+// make a object observable
+Observer.make = function (o, unsafe) {
+  var p;
+
+  // check if we will override properties
+  if (!unsafe) {
+    for (p in Observable) {
+      if (Observable.hasOwnProperty(p) && o.hasOwnProperty(p)) {
+        throw Error("cannot override property");
+      }
     }
   }
 
-  return -1;
-}
-
-/**
- * return an object in an array depending on the value of a property
- * @param {array} array - the array
- * @param {string} pname - name of the property
- * @param {*} pvalue - expected value of the property
- * @returns {*|null} - the hash if a hash was found, null otherwise
- * @private
- */
-function _getValueByProperty(array, pname, pvalue) {
-  var i = _getIndexByProperty(array, pname, pvalue);
-
-  return array[i] || null;
-}
-
-var Observer = {
-  on: function (event, callback) {
-    if (!this.__callbacks[event]) {
-      this.__callbacks[event] = [];
+  // add required attributes and methods
+  for (p in Observable) {
+    if (Observable.hasOwnProperty(p)) {
+      o[p] = Observable[p];
     }
+  }
 
-    var callbacks = this.__callbacks[event];
+  o.__events = {};
+};
 
-    callbacks.push(callback);
-  },
-  emit: function (event) {
+// listen for an event
+Observable.on = function (event, listener) {
+  if (typeof listener !== 'function') {
+    return;
+  }
+
+  if (!this.__events[event]) {
+    this.__events[event] = [];
+  }
+
+  this.__events[event].push(listener);
+
+  var self = this;
+
+  return {
+    dispose: function () {
+      self.clear(event, listener);
+    }
+  };
+};
+
+// listen for an event, called only once
+Observable.once = function (event, listener) {
+  var self = this, ptr;
+
+  ptr = this.on(event, function () {
+    // no optimization here sincee it should be called once
+    // todo: optimise the way of passing arguments
     var args = Array.prototype.slice.call(arguments);
 
-    args.splice(0, 1);
+    ptr.dispose();
 
-    var callbacks = this.__callbacks[event];
-
-    if (!callbacks) {
-      return;
-    }
-
-    for (var i = 0; i < callbacks.length; i += 1) {
-      callbacks[i].apply(null, args);
-    }
-  }
+    listener.apply(null, args);
+  });
 };
 
-var Observable = {
-  make: function (obj) {
-    for (var e in Observer) {
-      obj[e] = Observer[e];
-    }
+// emit an events
+Observable.emit = function (event, arg0, arg1, arg2) {
+  var listeners = this.__events[event];
 
-    obj.__callbacks = [];
+  if (!listeners || !listeners.length) {
+    return;
   }
+
+  switch (arguments.length) {
+    case 1: callListeners(listeners); break;
+    case 2: 
+      callListenersWith1Args(listeners, arg0);
+      break;
+    case 3: 
+      callListenersWith2Args(listeners, arg0, arg1);
+      break;
+    default:
+      console.error('cannot manage more arguments');
+      break;
+  }
+
 };
 
+// clear an event listener
+Observable.clear = function (event, listener) {
+  var listeners = this.__events[event];
+
+  if (!listeners || !listeners.length) {
+    return;
+  }
+
+  var index = listeners.indexOf(listener);
+
+  if (index !== -1) {
+    listeners.splice(index, 1);
+  }
+};
 /**
  * an entity objects which has an unique id and a collection of components
  * @constructor
@@ -84,13 +130,12 @@ var Observable = {
  * @fires Entity#update
  * @fires Entity#remove
  */
-var Entity = function () {
+var Entity = function (id) {
   /**
    * unique id of the entity
-   * @member {string}
+   * @member {Number}
    * */
-  this.id = (+new Date()).toString(16) + (Math.random() * 100000000 | 0)
-      .toString(16) + Entity.prototype._count;
+  this.id = id;
 
   /**
    * collection of components
@@ -106,10 +151,11 @@ var Entity = function () {
   this._systems = {};
 
   // make every entity observable to emit and receive events
-  Observable.make(this);
-
-  Entity.prototype._count += 1;
+  Observer.make(this);
 };
+
+// Instance variables
+Entity.prototype.disposed = false;
 
 /**
  * update one or multiple components
@@ -152,28 +198,14 @@ Entity.prototype._update = function (name, data) {
   var component = this.components[name];
 
   if (component) {
-    // if the component has an `update()` method, use it
-    if (component.update && typeof component.update === 'function') {
-      component.update(data);
-    } else {
-      var e;
+    var e;
 
-      // apply new properties
-      for (e in data) {
-        if (data.hasOwnProperty(e)) {
-          component[e] = data[e];
-        }
+    // apply new properties
+    for (e in data) {
+      if (data.hasOwnProperty(e)) {
+        component[e] = data[e];
       }
-    }
-
-    /**
-     * report updates on components
-     * @event Entity#update
-     * @param {string} name - name of the updated component
-     * @param {object} data - values of the component
-     * @param {object} updated - data applied to the component
-     */
-    this.emit('update', name, component, data);
+    }    
   } else {
     // if the component does not exists, add it silently
     this.components[name] = data;
@@ -187,7 +219,7 @@ Entity.prototype._update = function (name, data) {
      * @param {string} name - name of the added component
      * @param {object} data - data of the added component
      */
-    this.emit('add', name, data);
+    this.emit('addComponent', name, data);
   }
 };
 
@@ -199,7 +231,7 @@ Entity.prototype.remove = function (name) {
   if (this.components[name] !== undefined) {
     var data = this.components[name];
 
-    delete this.components[name];
+    this.components[name] = undefined;
 
     // remove the system matching cache because we removed a components
     this._systems = {};
@@ -210,7 +242,7 @@ Entity.prototype.remove = function (name) {
      * @param {string} name - name of the removed component
      * @param {object} data - data of the removed component
      */
-    this.emit('remove', name, data);
+    this.emit('removeComponent', name, data);
   }
 };
 
@@ -223,8 +255,6 @@ Entity.prototype.has = function (name) {
   return this.components[name] !== undefined;
 };
 
-// counter used to generate uid for this entity
-Entity.prototype._count = 0;
 /**
  * a system apply behavior on entities by updating components
  * @param {string} name - name of the system
@@ -289,13 +319,15 @@ System.prototype.matchDependencies = function (entity) {
 
 /*global _getIndexByProperty */
 
+var MAX_SALTS = 1000;
+
 /**
  * creates a new entity component system
  * @constructor
  * @fires ECS#addEntity
  * @fires ECS#removeEntity
  */
-var ECS = function () {
+var ECS = function (salt) {
   /**
    * list of entities
    * @member {array}
@@ -323,9 +355,21 @@ var ECS = function () {
    */
   this.systems = [];
 
+  /**
+   * "salt" used to generate unique entity ids accros multiple instances
+   * @type {Number}
+   */
+  this.salt = salt || 0;
+
   // make this object observable. Then it will broadcast entity changes
   // to make system update their entity list
-  Observable.make(this);
+  Observer.make(this);
+};
+
+ECS.prototype.isLocal = function (entityId) {
+  var localId = Math.floor(entityId / MAX_SALTS);
+
+  return this.salt === entityId % localId;
 };
 
 /**
@@ -368,7 +412,9 @@ ECS.prototype.tick = function () {
  * @returns {Entity} - the newly created entity
  */
 ECS.prototype.createEntity = function (arg) {
-  var ent = new Entity();
+  var id = this.salt + (MAX_SALTS * _nextUid());
+
+  var ent = new Entity(id);
 
   if (arg) {
     var components = null, c = 0;
@@ -393,7 +439,7 @@ ECS.prototype.createEntity = function (arg) {
         throw new Error('no component schema \'' + name + '\'');
       }
 
-      var data   = JSON.parse(JSON.stringify(this._components[name]));
+      var data = JSON.parse(JSON.stringify(this._components[name]));
 
       ent.update(name, data);
     }
@@ -407,11 +453,6 @@ ECS.prototype.createEntity = function (arg) {
  * @param {Entity} entity - the entity to add
  */
 ECS.prototype.addEntity = function (entity) {
-  // listen for entity events
-  entity.on('add', this._onComponentAdd(entity));
-  entity.on('update', this._onComponentUpdate(entity));
-  entity.on('remove', this._onComponentRemove(entity));
-
   this.entities.push(entity);
 
   /**
@@ -419,7 +460,7 @@ ECS.prototype.addEntity = function (entity) {
    * @event ECS#addEntity
    * @param {Entity} entity - added entity
    */
-  this.emit('addEntity', entity);
+  this.emit('add', entity);
 
   return entity;
 };
@@ -456,13 +497,15 @@ ECS.prototype.removeEntity = function (arg0) {
   if (index !== -1) {
     ent = this.entities.splice(index, 1)[0];
 
+    ent.disposed = true;
+
     /**
      * remove entity event
      * @event ECS#removeEntity
      * @param {Entity} entity - entity removed
      */
-    this.emit("removeEntity", ent);
-    ent.emit('removeEntity');
+    this.emit('remove', ent);
+    ent.emit('remove');
   }
 };
 
@@ -514,63 +557,6 @@ ECS.prototype.createSystem = function (arg0, arg1, arg2) {
   return sys;
 };
 
-/**
- * create a closure that broadcast an add event from an entity. The main goal
- * of this closure is to append the entity object in the event arguments
- * @param {Entity} entity - the entity
- * @returns {Function} - the created callback
- * @private
- */
-ECS.prototype._onComponentAdd = function (entity) {
-  var self = this;
-
-  return function (name, data) {
-    self._broadcast('componentAdd', [entity, name, data]);
-  };
-};
-
-/**
- * create a closure that broadcast an update event from an entity. The main goal
- * of this closure is to append the entity object in the event arguments
- * @param {Entity} entity - the entity
- * @returns {Function} - the created callback
- * @private
- */
-ECS.prototype._onComponentUpdate = function (entity) {
-  var self = this;
-
-  return function (name, data) {
-    self._broadcast('componentUpdate', [entity, name, data]);
-  };
-};
-
-/**
- * create a closure that broadcast a remove event from an entity. The main goal
- * of this closure is to append the entity object in the event arguments
- * @param {Entity} entity - the entity
- * @returns {Function} - the created callback
- * @private
- */
-ECS.prototype._onComponentRemove = function (entity) {
-  var self = this;
-
-  return function (name, data) {
-    self._broadcast('componentRemove', [entity, name, data]);
-  };
-};
-
-/**
- * broadcast an event to all systems
- * @param {string} event - name of the event
- * @param {*} args - arguments of the event
- * @private
- */
-ECS.prototype._broadcast = function (event, args) {
-  // prepend event as the first argument
-  args.unshift(event);
-
-  this.emit.apply(this, args);
-};
 
   // detect requirejs and define module if defined. Else check for commonjs
   // and define a module if defined. If not in requirejs or commonjs, add
